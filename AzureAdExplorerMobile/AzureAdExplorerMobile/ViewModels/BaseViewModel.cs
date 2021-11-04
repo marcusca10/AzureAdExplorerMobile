@@ -11,6 +11,7 @@ namespace AzureAdExplorerMobile.ViewModels
     public class BaseViewModel : INotifyPropertyChanged
     {
         public IDataStore<Item> DataStore => DependencyService.Get<IDataStore<Item>>();
+        public IAuthenticationService AuthService => DependencyService.Get<IAuthenticationService>();
 
         bool isBusy = false;
         public bool IsBusy

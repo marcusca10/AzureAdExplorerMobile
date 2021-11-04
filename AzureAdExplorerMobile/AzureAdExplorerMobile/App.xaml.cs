@@ -13,7 +13,9 @@ namespace AzureAdExplorerMobile
         {
             InitializeComponent();
 
+            DependencyService.Register<AzureAdAuthenticationService>();
             DependencyService.Register<MockDataStore>();
+
             MainPage = new AppShell();
         }
 
