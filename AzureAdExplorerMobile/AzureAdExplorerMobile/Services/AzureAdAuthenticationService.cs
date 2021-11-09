@@ -55,13 +55,13 @@ namespace AzureAdExplorerMobile.Services
         {
             // default redirectURI; each platform specific project will have to override it with its own
             var builder = PublicClientApplicationBuilder.Create(AzureAdConstants.ClientID)
-                .WithLogging(Log, LogLevel.Verbose, true)
+                .WithLogging(Log, LogLevel.Error, true)
                 .WithAuthority(AzureAdConstants.Authority)
                 .WithIosKeychainSecurityGroup(AzureAdConstants.IOSKeyChainGroup)
                 .WithRedirectUri(this.RedirectUri);
 
             // Android implementation is based on https://github.com/jamesmontemagno/CurrentActivityPlugin
-            // iOS implementation would require to expose the current ViewControler - not currently implemented as it is not required
+            // iOS implementation exposes the current ViewControler
             // UWP does not require this
             var windowLocatorService = DependencyService.Get<IParentWindowLocatorService>();
             if (windowLocatorService != null)
@@ -113,7 +113,6 @@ namespace AzureAdExplorerMobile.Services
                     .ExecuteAsync();
             else
                 authResult = await _pca.AcquireTokenInteractive(AzureAdConstants.Scopes)
-                    .WithParentActivityOrWindow(App.RootViewController)
                     .ExecuteAsync();
 
 

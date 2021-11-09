@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using AzureAdExplorerMobile.Services;
 using Foundation;
 using Microsoft.Identity.Client;
 using UIKit;
+using Xamarin.Forms;
 
 namespace AzureAdExplorerMobile.iOS
 {
@@ -25,7 +26,8 @@ namespace AzureAdExplorerMobile.iOS
         {
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
-            App.RootViewController = new UIViewController();
+
+            DependencyService.Register<IParentWindowLocatorService, IosParentWindowLocatorService>();
 
             return base.FinishedLaunching(app, options);
         }

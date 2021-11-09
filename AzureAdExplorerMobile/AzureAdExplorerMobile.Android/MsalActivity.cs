@@ -15,8 +15,9 @@ namespace AzureAdExplorerMobile.Droid
     [Activity]
     [IntentFilter(new[] { Intent.ActionView },
         Categories = new[] { Intent.CategoryBrowsable, Intent.CategoryDefault },
-        DataHost = "auth",
-        DataScheme = "Enter_the_Package_Name")]
+        DataHost = "Enter_the_Package_Name",
+        DataScheme = "msauth",
+        DataPath = "/Enter_the_Signature_Hash")]
     public class MsalActivity : BrowserTabActivity
     {
     }

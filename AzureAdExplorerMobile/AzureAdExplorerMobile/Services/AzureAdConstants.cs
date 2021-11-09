@@ -14,7 +14,7 @@ namespace AzureAdExplorerMobile.Services
 
         public static string Authority = $"https://login.microsoftonline.com/{Tenant}/";
         public static string IOSKeyChainGroup = "com.microsoft.adalcache";
-        public static string AndroidRedirectUri = "Enter_the_Package_Name://auth";
+        public static string AndroidRedirectUri = "msauth://Enter_the_Package_Name/Enter_the_Signature_Hash";
         public static string IOSRedirectUri = "msauth.Enter_the_Bundle_Id_Here://auth";
         public static string UWPRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
     }
