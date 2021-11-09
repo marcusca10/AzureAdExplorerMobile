@@ -8,6 +8,7 @@
              Shell.NavBarIsVisible="False">
     <ContentPage.Content>
         <StackLayout Padding="10,0,10,0" VerticalOptions="Center">
+            <Picker Title="Select a autentication mode" IsVisible="{Binding AuthModeVisible}" ItemsSource="{Binding AuthModeList}" SelectedItem="{Binding SelectedAuthMode}" />
             <Button VerticalOptions="Center" Text="{Binding LoginText}" Command="{Binding LoginCommand}"/>
         </StackLayout>
     </ContentPage.Content>

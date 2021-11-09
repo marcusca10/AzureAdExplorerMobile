@@ -9,7 +9,8 @@ namespace AzureAdExplorerMobile.Services
     public interface IAuthenticationService
     {
         UserContext UserContext { get; set; }
-        Task SignInAsync();
+        bool UseBroker { get; set; }
+        Task SignInAsync(bool useWebView = false);
         Task SignOutAsync();
 
     }

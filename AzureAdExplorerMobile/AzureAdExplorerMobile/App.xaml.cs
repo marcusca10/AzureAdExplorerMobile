@@ -8,6 +8,7 @@ namespace AzureAdExplorerMobile
 {
     public partial class App : Application
     {
+        public static object RootViewController { get; set; }
 
         public App()
         {

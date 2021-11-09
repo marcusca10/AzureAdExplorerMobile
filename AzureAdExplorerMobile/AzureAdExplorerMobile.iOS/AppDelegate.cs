@@ -25,13 +25,24 @@ namespace AzureAdExplorerMobile.iOS
         {
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
+            App.RootViewController = new UIViewController();
 
             return base.FinishedLaunching(app, options);
         }
 
-        public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
+        public override bool OpenUrl(UIApplication app, NSUrl url, string sourceApplication, NSObject annotation)
         {
-            AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(url);
+            if (AuthenticationContinuationHelper.IsBrokerResponse(sourceApplication))
+            {
+                AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);
+                return true;
+            }
+
+            else if (!AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(url))
+            {
+                return false;
+            }
+
             return true;
         }
     }

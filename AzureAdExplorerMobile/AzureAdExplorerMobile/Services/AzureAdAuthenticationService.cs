@@ -11,9 +11,9 @@ using Xamarin.Forms;
 
 namespace AzureAdExplorerMobile.Services
 {
-    public class AzureAdAuthenticationService: IAuthenticationService
+    public class AzureAdAuthenticationService : IAuthenticationService
     {
-        private readonly IPublicClientApplication _pca;
+        private IPublicClientApplication _pca;
 
         public AzureAdAuthenticationService()
         {
@@ -23,8 +23,39 @@ namespace AzureAdExplorerMobile.Services
                 IsLoggedOn = false
             };
 
+            BuildClientApplication(false);
+        }
+
+        public UserContext UserContext { get; set; }
+
+        public bool UseBroker
+        {
+            get
+            {
+                return _pca.AppConfig.IsBrokerEnabled;
+            }
+            set
+            {
+                if (_pca.AppConfig.IsBrokerEnabled != value)
+                    this.BuildClientApplication(value);
+            }
+        }
+
+        private static void Log(LogLevel level, string message, bool containsPii)
+        {
+            if (containsPii)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            Console.WriteLine($"{level} {message}");
+            Console.ResetColor();
+        }
+
+        public void BuildClientApplication(bool useBroker)
+        {
             // default redirectURI; each platform specific project will have to override it with its own
             var builder = PublicClientApplicationBuilder.Create(AzureAdConstants.ClientID)
+                .WithLogging(Log, LogLevel.Verbose, true)
                 .WithAuthority(AzureAdConstants.Authority)
                 .WithIosKeychainSecurityGroup(AzureAdConstants.IOSKeyChainGroup)
                 .WithRedirectUri(this.RedirectUri);
@@ -33,18 +64,21 @@ namespace AzureAdExplorerMobile.Services
             // iOS implementation would require to expose the current ViewControler - not currently implemented as it is not required
             // UWP does not require this
             var windowLocatorService = DependencyService.Get<IParentWindowLocatorService>();
-
             if (windowLocatorService != null)
             {
                 builder = builder.WithParentActivityOrWindow(() => windowLocatorService?.GetCurrentParentWindow());
             }
 
+            // broker
+            if (useBroker)
+            {
+                builder = builder.WithBroker();
+            }
+
             _pca = builder.Build();
         }
 
-        public UserContext UserContext { get; set; }
-
-        public async Task SignInAsync()
+        public async Task SignInAsync(bool useWebView)
         {
             UserContext newContext;
             try
@@ -55,7 +89,7 @@ namespace AzureAdExplorerMobile.Services
             catch (MsalUiRequiredException)
             {
                 // acquire token interactive
-                newContext = await SignInInteractively();
+                newContext = await SignInInteractively(useWebView);
             }
             
             UserContext = newContext;
@@ -70,9 +104,18 @@ namespace AzureAdExplorerMobile.Services
             return newContext;
         }
 
-        private async Task<UserContext> SignInInteractively()
+        private async Task<UserContext> SignInInteractively(bool useWebView)
         {
-            AuthenticationResult authResult = await _pca.AcquireTokenInteractive(AzureAdConstants.Scopes).ExecuteAsync();
+            AuthenticationResult authResult;
+            if (useWebView)
+                authResult = await _pca.AcquireTokenInteractive(AzureAdConstants.Scopes)
+                    .WithUseEmbeddedWebView(true)
+                    .ExecuteAsync();
+            else
+                authResult = await _pca.AcquireTokenInteractive(AzureAdConstants.Scopes)
+                    .WithParentActivityOrWindow(App.RootViewController)
+                    .ExecuteAsync();
+
 
             var newContext = UpdateUserInfo(authResult);
             return newContext;
