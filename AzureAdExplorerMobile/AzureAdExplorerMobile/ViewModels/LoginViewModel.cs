@@ -86,7 +86,7 @@ namespace AzureAdExplorerMobile.ViewModels
                 // Alert if any exception excluding user canceling sign-in dialog
                 if (((ex as MsalException)?.ErrorCode != "authentication_canceled"))
                     //await DisplayAlert($"Exception:", ex.ToString(), "Dismiss");
-                    Debug.WriteLine($"Exception:", ex.ToString(), "Dismiss");
+                    Debug.WriteLine($"Exception: {ex.ToString()}");
             }
 
 

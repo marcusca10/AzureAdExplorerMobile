@@ -3,6 +3,7 @@ using Microsoft.Identity.Client;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,16 +40,6 @@ namespace AzureAdExplorerMobile.Services
                 if (_pca.AppConfig.IsBrokerEnabled != value)
                     this.BuildClientApplication(value);
             }
-        }
-
-        private static void Log(LogLevel level, string message, bool containsPii)
-        {
-            if (containsPii)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-            }
-            Console.WriteLine($"{level} {message}");
-            Console.ResetColor();
         }
 
         public void BuildClientApplication(bool useBroker)
@@ -97,8 +88,17 @@ namespace AzureAdExplorerMobile.Services
 
         private async Task<UserContext> AcquireTokenSilent()
         {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync();
-            AuthenticationResult authResult = await _pca.AcquireTokenSilent(AzureAdConstants.Scopes, accounts.FirstOrDefault()).ExecuteAsync();
+            IAccount accountToLogin;
+
+            if (this.UseBroker && DeviceInfo.Platform == DevicePlatform.UWP)
+                accountToLogin = PublicClientApplication.OperatingSystemAccount;
+            else
+            {
+                IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync();
+                accountToLogin = accounts.FirstOrDefault();
+            }
+
+            AuthenticationResult authResult = await _pca.AcquireTokenSilent(AzureAdConstants.Scopes, accountToLogin).ExecuteAsync();
 
             var newContext = UpdateUserInfo(authResult);
             return newContext;
@@ -191,6 +191,19 @@ namespace AzureAdExplorerMobile.Services
             idToken = idToken.Split('.')[1];
             idToken = Base64UrlDecode(idToken);
             return JObject.Parse(idToken);
+        }
+
+        private static void Log(LogLevel level, string message, bool containsPii)
+        {
+            // Debug.WriteLine expects first parameter as a format string, that consider { and } as placeholder delimiters
+            string errorMsg = message.Replace("{", "{{").Replace("}", "}}");
+
+            if (containsPii)
+            {
+                message = $"[PII] {errorMsg}";
+            }
+
+            Debug.WriteLine(errorMsg, level);
         }
     }
 }
