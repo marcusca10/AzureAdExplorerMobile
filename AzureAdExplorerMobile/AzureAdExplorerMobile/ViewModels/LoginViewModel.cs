@@ -61,6 +61,8 @@ namespace AzureAdExplorerMobile.ViewModels
         {
             try
             {
+                App.LastExceptionMessage = string.Empty;
+
                 if (!this.AuthService.UserContext.IsLoggedOn)
                 {
                     if (selectedAuthMode == 2)
@@ -86,9 +88,11 @@ namespace AzureAdExplorerMobile.ViewModels
             catch (Exception ex)
             {
                 // Alert if any exception excluding user canceling sign-in dialog
-                if (((ex as MsalException)?.ErrorCode != "authentication_canceled"))
-                    //await DisplayAlert($"Exception:", ex.ToString(), "Dismiss");
+                if ((ex as MsalException)?.ErrorCode != "authentication_canceled")
+                {
+                    App.LastExceptionMessage = $"Exception:\r\n{ex.Message}";
                     Debug.WriteLine($"Exception: {ex.Message}");
+                }
             }
 
 

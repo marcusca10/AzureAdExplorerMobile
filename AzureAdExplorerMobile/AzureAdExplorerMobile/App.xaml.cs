@@ -8,6 +8,7 @@ namespace AzureAdExplorerMobile
 {
     public partial class App : Application
     {
+        public static string LastExceptionMessage = string.Empty;
 
         public App()
         {
