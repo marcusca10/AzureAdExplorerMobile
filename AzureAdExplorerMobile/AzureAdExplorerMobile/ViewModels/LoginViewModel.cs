@@ -68,8 +68,10 @@ namespace AzureAdExplorerMobile.ViewModels
                     else
                         this.AuthService.UseBroker = false;
 
+                    if (selectedAuthMode == 1 && DeviceInfo.Platform == DevicePlatform.UWP)
+                        await this.AuthService.SignInAsync(useIwa: true);
                     if (selectedAuthMode == 1)
-                        await this.AuthService.SignInAsync(true);
+                        await this.AuthService.SignInAsync(useWebView: true);
                     else
                         await this.AuthService.SignInAsync();
 
@@ -86,7 +88,7 @@ namespace AzureAdExplorerMobile.ViewModels
                 // Alert if any exception excluding user canceling sign-in dialog
                 if (((ex as MsalException)?.ErrorCode != "authentication_canceled"))
                     //await DisplayAlert($"Exception:", ex.ToString(), "Dismiss");
-                    Debug.WriteLine($"Exception: {ex.ToString()}");
+                    Debug.WriteLine($"Exception: {ex.Message}");
             }
 
 

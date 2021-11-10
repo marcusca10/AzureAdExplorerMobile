@@ -10,7 +10,7 @@ namespace AzureAdExplorerMobile.Services
     {
         UserContext UserContext { get; set; }
         bool UseBroker { get; set; }
-        Task SignInAsync(bool useWebView = false);
+        Task SignInAsync(bool useWebView = false, bool useIwa = false);
         Task SignOutAsync();
 
     }

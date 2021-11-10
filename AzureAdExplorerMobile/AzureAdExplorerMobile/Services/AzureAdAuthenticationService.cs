@@ -69,13 +69,13 @@ namespace AzureAdExplorerMobile.Services
             _pca = builder.Build();
         }
 
-        public async Task SignInAsync(bool useWebView)
+        public async Task SignInAsync(bool useWebView, bool useIwa)
         {
             UserContext newContext;
             try
             {
                 // acquire token silent
-                newContext = await AcquireTokenSilent();
+                newContext = await AcquireTokenSilent(useIwa);
             }
             catch (MsalUiRequiredException)
             {
@@ -86,19 +86,25 @@ namespace AzureAdExplorerMobile.Services
             UserContext = newContext;
         }
 
-        private async Task<UserContext> AcquireTokenSilent()
+        private async Task<UserContext> AcquireTokenSilent(bool useIwa)
         {
             IAccount accountToLogin;
+            AuthenticationResult authResult;
 
-            if (this.UseBroker && DeviceInfo.Platform == DevicePlatform.UWP)
-                accountToLogin = PublicClientApplication.OperatingSystemAccount;
+            if (useIwa)
+                authResult = await _pca.AcquireTokenByIntegratedWindowsAuth(AzureAdConstants.Scopes).ExecuteAsync();
             else
             {
-                IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync();
-                accountToLogin = accounts.FirstOrDefault();
-            }
+                if (this.UseBroker && DeviceInfo.Platform == DevicePlatform.UWP)
+                    accountToLogin = PublicClientApplication.OperatingSystemAccount;
+                else
+                {
+                    IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync();
+                    accountToLogin = accounts.FirstOrDefault();
+                }
 
-            AuthenticationResult authResult = await _pca.AcquireTokenSilent(AzureAdConstants.Scopes, accountToLogin).ExecuteAsync();
+                authResult = await _pca.AcquireTokenSilent(AzureAdConstants.Scopes, accountToLogin).ExecuteAsync();
+            }
 
             var newContext = UpdateUserInfo(authResult);
             return newContext;
@@ -107,6 +113,7 @@ namespace AzureAdExplorerMobile.Services
         private async Task<UserContext> SignInInteractively(bool useWebView)
         {
             AuthenticationResult authResult;
+            
             if (useWebView)
                 authResult = await _pca.AcquireTokenInteractive(AzureAdConstants.Scopes)
                     .WithUseEmbeddedWebView(true)
